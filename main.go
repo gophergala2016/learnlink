@@ -1,60 +1,55 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"github.com/jebrial/learnlink/models"
+	"goji.io"
+	"goji.io/pat"
 	"golang.org/x/net/context"
+	//"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 )
 
-type ContextHandler interface {
-	ServeHTTPContext(context.Context, http.ResponseWriter, *http.Request)
-}
-
-type ContextHandlerFunc func(context.Context, http.ResponseWriter, *http.Request)
-
-func (h ContextHandlerFunc) ServeHTTPContext(ctx context.Context, rw http.ResponseWriter, req *http.Request) {
-	h(ctx, rw, req)
-}
-
-type ContextAdapter struct {
-	ctx     context.Context
-	handler ContextHandler
-}
-
-func (ca *ContextAdapter) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	ca.handler.ServeHTTPContext(ca.ctx, rw, req)
-}
-
-type config struct {
+type Config struct {
 	dbUrl string
 }
 
-func main() {
-	//load the config
-	file, err := os.Open("config.json")
-	if err != nil {
-		log.Panic(err)
-	}
-	decoder := json.NewDecoder(file)
-	config := config{}
-	err = decoder.Decode(&config)
-	if err != nil {
-		log.Panic(err)
-	}
+func dbWare() func(goji.Handler) goji.Handler {
+	// // //load the config
+	// file, err := ioutil.ReadFile("config.json")
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
+	// var config Config
+	// err = json.Unmarshal(file, &config)
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
 	// connect to the database
-	db, err2 := models.NewDB(config.dbUrl)
+
+	db, err2 := models.NewDB("DATABASE URL HERE") //models.NewDB(config.dbUrl)
 	if err2 != nil {
 		log.Panic(err2)
 	}
 
-	ctx := context.WithValue(context.Background(), "db", db)
+	return func(h goji.Handler) goji.Handler {
+		fn := func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+			ctx = context.WithValue(ctx, "db", db)
+			h.ServeHTTPC(ctx, w, r)
+		}
+		return goji.HandlerFunc(fn)
+	}
 
-	http.Handle("/users", &ContextAdapter{ctx, ContextHandlerFunc(usersIndex)})
-	err = http.ListenAndServe(":3001", nil)
+}
+
+func main() {
+
+	mux := goji.NewMux()
+	mux.UseC(dbWare())
+	mux.HandleFuncC(pat.Get("/users"), usersIndex)
+	err := http.ListenAndServe(":3001", mux)
 	if err != nil {
 		panic(err)
 	}
