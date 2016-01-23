@@ -1,4 +1,4 @@
-#Learnlink: a way to organize links to online study topics.
+#LearnLink: a way to organize links to online study topics.
 ===========================================================
 
 ###by Gabe Dalay and Howard Kim
@@ -7,7 +7,7 @@
 
 I have been doing a lot of studying online and I am constantly looking at sites like coursea, udacity, khan academy, and any free online resources for learning.  I have problems keeping track of all the topics I study. It can be hard to keep track of all the sites I visit since they are "no commitment" learning tools and I am using them to explore a vast amount of topics.
 
-Linklearn will hopefully solve this problem. The basic idea is to allow you to manually enter a course name, some urls, notes, and then be able to keep track of progress based on priority and checkoff times.
+LearnLink will hopefully solve this problem. The basic idea is to allow you to manually enter a course name, some urls, notes, and then be able to keep track of progress based on priority and checkoff times.
 
 Do give an idea of how this works: 
 
