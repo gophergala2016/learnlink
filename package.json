@@ -1,0 +1,23 @@
+{
+  "name": "learnlink",
+  "version": "1.0.0",
+  "description": "Tracking your online courseload into one neat list.",
+  "main": "client/js/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gophergala2016/learnlink.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gophergala2016/learnlink/issues"
+  },
+  "homepage": "https://github.com/gophergala2016/learnlink#readme",
+  "dependencies": {
+    "webpack": "^1.12.11",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
