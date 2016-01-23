@@ -2,21 +2,17 @@ package main
 
 import (
 	//"encoding/json"
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jebrial/learnlink/models"
-	"goji.io"
-	"goji.io/pat"
-	"golang.org/x/net/context"
 	//"io/ioutil"
 	"log"
-	"net/http"
 )
 
-type Config struct {
-	dbUrl string
-}
+// type Config struct {
+// 	dbUrl string
+// }
 
-func dbWare() func(goji.Handler) goji.Handler {
+func dbWare() gin.HandlerFunc {
 	// // //load the config
 	// file, err := ioutil.ReadFile("config.json")
 	// if err != nil {
@@ -29,46 +25,78 @@ func dbWare() func(goji.Handler) goji.Handler {
 	// }
 	// connect to the database
 
-	db, err2 := models.NewDB("DATABASE URL HERE") //models.NewDB(config.dbUrl)
+	db, err2 := models.NewDB("")
 	if err2 != nil {
 		log.Panic(err2)
 	}
+	return func(c *gin.Context) {
 
-	return func(h goji.Handler) goji.Handler {
-		fn := func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-			ctx = context.WithValue(ctx, "db", db)
-			h.ServeHTTPC(ctx, w, r)
-		}
-		return goji.HandlerFunc(fn)
+		c.Set("db", db)
+		c.Next()
 	}
 
 }
 
 func main() {
+	ginServer := gin.New()
+	ginServer.Use(dbWare())
+	ginServer.GET("/user/all", usersIndex)
+	ginServer.GET("/user/find/:email", userSearch)
+	ginServer.POST("/user/new", userAdd)
+	ginServer.DELETE("/user/delete/:email", userRemove)
 
-	mux := goji.NewMux()
-	mux.UseC(dbWare())
-	mux.HandleFuncC(pat.Get("/users"), usersIndex)
-	err := http.ListenAndServe(":3001", mux)
-	if err != nil {
-		panic(err)
-	}
-
+	ginServer.Run(":3001")
 }
 
-func usersIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, http.StatusText(405), 405)
-		return
-	}
-
+func usersIndex(ctx *gin.Context) {
 	users, err := models.AllUsers(ctx)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
+		ctx.JSON(404, gin.H{"error": "No users found"})
 		return
 	}
-
-	for _, user := range users {
-		fmt.Fprintf(w, "%d, %s, %s\n", user.Id, user.Name, user.Email)
-	}
+	ctx.JSON(200, users)
 }
+
+func userSearch(ctx *gin.Context) {
+	user, err := models.FindUser(ctx)
+	if err != nil {
+		ctx.JSON(404, gin.H{"error": "User not found"})
+		return
+	}
+	ctx.JSON(200, user)
+}
+
+func userAdd(ctx *gin.Context) {
+	_, err := models.AddUser(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Internal error"})
+		return
+	}
+	ctx.JSON(200, gin.H{"success": "New user added"})
+}
+
+func userRemove(ctx *gin.Context) {
+	_, err := models.RemoveUser(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Internal error"})
+		return
+	}
+	ctx.JSON(200, gin.H{"success": "User removed"})
+}
+
+// func courseIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != "GET" {
+// 		http.Error(w, http.StatusText(405), 405)
+// 		return
+// 	}
+
+// 	courses, err := models.ListCourse(ctx)
+// 	if err != nil {
+// 		http.Error(w, http.StatusText(500), 500)
+// 		return
+// 	}
+
+// 	for _, user := range users {
+// 		fmt.Fprintf(w, "%d, %s, %s\n", user.Id, user.Name, user.Email)
+// 	}
+// }

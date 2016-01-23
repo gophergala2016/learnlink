@@ -2,25 +2,22 @@ package models
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
-	"golang.org/x/net/context"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
 type User struct {
-	Id        int
-	Name      string
-	Email     string
+	Id        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func AllUsers(ctx context.Context) ([]*User, error) {
-	db, ok := ctx.Value("db").(*sql.DB)
-	if !ok {
-		return nil, errors.New("Models: could not get database connection to pool")
-	}
+func AllUsers(ctx *gin.Context) ([]*User, error) {
+	db := ctx.MustGet("db").(*sql.DB)
 	rows, err := db.Query("SELECT * FROM classmate")
 	if err != nil {
 		return nil, err
@@ -30,8 +27,7 @@ func AllUsers(ctx context.Context) ([]*User, error) {
 	users := make([]*User, 0)
 	for rows.Next() {
 		user := new(User)
-		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt)
-		fmt.Println(user)
+		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -44,15 +40,52 @@ func AllUsers(ctx context.Context) ([]*User, error) {
 	return users, nil
 }
 
+func FindUser(ctx *gin.Context) (*User, error) {
+	db := ctx.MustGet("db").(*sql.DB)
+	email := ctx.Param("email")
+	user := new(User)
+	err := db.QueryRow("SELECT * FROM classmate WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func AddUser(ctx *gin.Context) (*User, error) {
+	db := ctx.MustGet("db").(*sql.DB)
+	user := new(User)
+	user.Name = ctx.PostForm("name")
+	user.Email = ctx.PostForm("email")
+	user.Password = ctx.PostForm("password")
+	err := db.QueryRow("INSERT INTO classmate(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = ""
+	return user, nil
+}
+
+func RemoveUser(ctx *gin.Context) (bool, error) {
+	db := ctx.MustGet("db").(*sql.DB)
+	email := ctx.Param("email")
+	_, err := db.Exec("DELETE FROM classmate WHERE email=$1", email)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 /*
 CREATE TABLE "classmate" (
 	id bigserial primary key,
 	name varchar(50) NOT NULL,
 	email varchar(50) NOT NULL,
+	password varchar(200) NOT NULL,
 	created_at timestamp DEFAULT current_timestamp,
-	updated_at timestamp DEFAULT current_timestamp
+	updated_at timestamp DEFAULT current_timestamp,
+	unique(email)
 );
 
-INSERT INTO "classmate" (name,email) VALUES ('rick','plumbus@fleeb.com'), ('morty', 'dumbus@fleeb.com');
+INSERT INTO "classmate" (name,email, password) VALUES ('rick','plumbus@fleeb.com','hashedpassword'), ('morty', 'dumbus@fleeb.com', 'hashedpassword');
 
 */
