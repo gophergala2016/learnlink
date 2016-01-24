@@ -52,7 +52,7 @@ func main() {
 
 	//login public routes
 	ginServer.POST("/login", UserLogin)
-	ginServer.POST("/login/new", UserAdd)
+	ginServer.POST("/signup", UserAdd)
 	//set up private routes
 	private := ginServer.Group("/api")
 	private.Use(jwt.Auth(SECRET))
@@ -71,11 +71,12 @@ func main() {
 func UserLogin(ctx *gin.Context) {
 	user, err := models.FindUser(ctx)
 	if err != nil {
-		ctx.JSON(404, gin.H{"error": "error login in"})
+		ctx.JSON(404, gin.H{"error": "error loging in"})
 		return
 	}
 	if user.Password != ctx.PostForm("password") {
 		ctx.JSON(401, gin.H{"error": "User not Authorized"})
+		return
 	}
 	token := jwtLib.New(jwtLib.GetSigningMethod("HS256"))
 	token.Claims["ID"] = user.Email
