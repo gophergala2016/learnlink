@@ -1,7 +1,7 @@
-#LearnLink: a way to organize links to online study topics.
+# LearnLink: a way to organize links to online study topics.
 ===========================================================
 
-###by Gabe Dalay and Howard Kim
+### by Gabe Dalay and Howard Kim
 --------------------------------
 
 
@@ -22,3 +22,18 @@ Let's say you have added a few courses.
 4. You will be able to add urls: These could be links to the course itself or maybe related topics.
 
 5. (v2 features post hackathon to come)
+
+
+
+
+
+
+
+
+
+### Client-Side Setup
+---------------------
+
+1. ` npm install `
+2. ` grunt watch `
+3. Public directory is located in `/dist` 

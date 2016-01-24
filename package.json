@@ -17,7 +17,12 @@
   },
   "homepage": "https://github.com/gophergala2016/learnlink#readme",
   "dependencies": {
-    "webpack": "^1.12.11",
-    "webpack-dev-server": "^1.14.1"
+    "express": "^4.13.4",
+    "grunt": "^0.4.5"
+  },
+  "devDependencies": {
+    "grunt-angular-templates": "^1.0.2",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1"
   }
 }
