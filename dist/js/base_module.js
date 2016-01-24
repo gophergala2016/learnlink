@@ -6,7 +6,11 @@ var dependencies = [
 
 angular
   .module('LEARNLINK', dependencies)
-  .config(function ($routeProvider, $locationProvider) {
+  .config(function ($routeProvider, $locationProvider, $mdThemingProvider) {
+
+    $mdThemingProvider.theme('default')
+      .primaryPalette('green')
+      .accentPalette('orange')
 
     $routeProvider
       .when('/', {

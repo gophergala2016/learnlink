@@ -6,6 +6,10 @@ module.exports = function(grunt) {
       options: {
         separator: '; ',
       },
+      css: {
+        src: ['client/index.css'],
+        dest: 'dist/css/index.css'
+      },
       base_module: {
         src: ['client/js/app.js'],
         dest: 'dist/js/base_module.js'

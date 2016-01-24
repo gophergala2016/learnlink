@@ -1,10 +1,18 @@
 <head>
   <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+  <link rel="stylesheet" href="/css/index.css">
   <base href="/">
 </head>
 <body ng-app="LEARNLINK">
-  <ng-view>
-  </ng-view>
+  <md-toolbar md-scroll-shrink>
+    <div class="md-toolbar-tools">
+      <h3>
+        <span>LearnLink</span>
+      </h3>
+    </div>
+  </md-toolbar>
+  <div ng-view class="center-layout">
+  </div>
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
@@ -13,5 +21,5 @@
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
   <script type="text/javascript" src="/js/base_module.js"></script>
   <script type="text/javascript" src="/js/login_module.js"></script>
-    <script type="text/javascript" src="/js/templates.js"></script>
+  <script type="text/javascript" src="/js/templates.js"></script>
 </body>

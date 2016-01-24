@@ -1,1 +1,30 @@
-<h1>Welcome to Login</h1>
+<div layout="column">
+  <div flex>
+    <h1>Welcome to Login</h1>
+    <md-content layout-padding>
+      <div>
+        <form name="userForm" ng-submit="submit(user)">
+          <div layout-gt-sm="row">
+            <md-input-container class="md-block" flex-gt-sm>
+              <label>Username</label>
+              <input ng-model"user.username">
+            </md-input-container>
+          </div>
+          <div layout-gt-sm="row">
+            <md-input-container class="md-block" flex-gt-sm>
+              <label>Password</label>
+              <input ng-model="user.password">
+            </md-input-container>
+          </div>
+          <div layout-gt-sm="row">
+            <md-input-container class="md-block" flex-gt-sm>
+              <label>Email</label>
+              <input ng-model="user.email">
+            </md-input-container>
+          </div>
+          <md-button type="submit" class="md-raised md-primary">Login</md-button>
+        </form>
+      </div>
+    </md-content>
+  </div>
+</div>
