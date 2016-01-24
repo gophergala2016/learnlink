@@ -93,6 +93,7 @@ func userRemove(ctx *gin.Context) {
 func courseIndex(ctx *gin.Context) {
 	courses, err := models.AllCourses(ctx)
 	if err != nil {
+		log.Fatal(err)
 		ctx.JSON(404, gin.H{"error": "No courses found"})
 		return
 	}
@@ -111,7 +112,7 @@ func courseAdd(ctx *gin.Context) {
 func courseUpdate(ctx *gin.Context) {
 	_, err := models.UpdateCourse(ctx)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": err})
+		ctx.JSON(500, gin.H{"error": "Error processing request"})
 		return
 	}
 	ctx.JSON(200, gin.H{"success": "Course updated"})

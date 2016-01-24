@@ -99,15 +99,16 @@ func UpdateCourse(ctx *gin.Context) (*Course, error) {
 	course.Url = ctx.PostForm("url")
 	course.Priority, _ = strconv.Atoi(ctx.PostForm("priority"))
 	course.Checkoff, _ = strconv.Atoi(ctx.PostForm("checkoff"))
-	course.CheckoffTimeStamp, _ = time.Parse(time.RFC3339, ctx.PostForm("checkoff_time"))
+	checkoffTimeStamp := ctx.PostForm("checkoff_time") // , _ = time.Parse(time.RFC3339, ctx.PostForm("checkoff_time"))
 	course.Note = ctx.PostForm("note")
 	course.UpdatedAt = time.Now()
+
 	err := db.QueryRow("UPDATE courses SET (name, url, priority, checkoff, checkoff_time, note, updated_at) = ($1,$2,$3,$4,$5,$6,$7) WHERE id=$8 returning id;",
 		&course.Name,
 		&course.Url,
 		&course.Priority,
 		&course.Checkoff,
-		&course.CheckoffTimeStamp,
+		checkoffTimeStamp,
 		&course.Note,
 		&course.UpdatedAt,
 		&course.Id).Scan(&course.Id)
