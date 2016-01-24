@@ -2,13 +2,12 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"time"
 )
 
 type User struct {
-	Id        int       `json:"id"`
+	Id        int       `json:"user_id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
@@ -18,7 +17,7 @@ type User struct {
 
 func AllUsers(ctx *gin.Context) ([]*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
-	rows, err := db.Query("SELECT * FROM classmate")
+	rows, err := db.Query("SELECT * FROM classmates")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +28,6 @@ func AllUsers(ctx *gin.Context) ([]*User, error) {
 		user := new(User)
 		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		users = append(users, user)
@@ -44,7 +42,7 @@ func FindUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	email := ctx.Param("email")
 	user := new(User)
-	err := db.QueryRow("SELECT * FROM classmate WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM classmates WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +55,7 @@ func AddUser(ctx *gin.Context) (*User, error) {
 	user.Name = ctx.PostForm("name")
 	user.Email = ctx.PostForm("email")
 	user.Password = ctx.PostForm("password")
-	err := db.QueryRow("INSERT INTO classmate(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
+	err := db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +66,7 @@ func AddUser(ctx *gin.Context) (*User, error) {
 func RemoveUser(ctx *gin.Context) (bool, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	email := ctx.Param("email")
-	_, err := db.Exec("DELETE FROM classmate WHERE email=$1", email)
+	_, err := db.Exec("DELETE FROM classmates WHERE email=$1", email)
 	if err != nil {
 		return false, err
 	}
@@ -76,7 +74,7 @@ func RemoveUser(ctx *gin.Context) (bool, error) {
 }
 
 /*
-CREATE TABLE "classmate" (
+CREATE TABLE "classmates" (
 	id bigserial primary key,
 	name varchar(50) NOT NULL,
 	email varchar(50) NOT NULL,
@@ -86,6 +84,6 @@ CREATE TABLE "classmate" (
 	unique(email)
 );
 
-INSERT INTO "classmate" (name,email, password) VALUES ('rick','plumbus@fleeb.com','hashedpassword'), ('morty', 'dumbus@fleeb.com', 'hashedpassword');
+INSERT INTO "classmates" (name,email, password) VALUES ('rick','plumbus@fleeb.com','hashedpassword'), ('morty', 'dumbus@fleeb.com', 'hashedpassword');
 
 */

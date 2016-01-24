@@ -1,49 +1,59 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/jebrial/learnlink/models"
-	//"io/ioutil"
 	"log"
+	"os"
 )
 
-// type Config struct {
-// 	dbUrl string
-// }
+type Conf struct {
+	Url string
+}
 
-func dbWare() gin.HandlerFunc {
-	// // //load the config
-	// file, err := ioutil.ReadFile("config.json")
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-	// var config Config
-	// err = json.Unmarshal(file, &config)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+func dbWare(url string) gin.HandlerFunc {
 	// connect to the database
-
-	db, err2 := models.NewDB("")
-	if err2 != nil {
-		log.Panic(err2)
+	db, err := models.NewDB(url)
+	if err != nil {
+		log.Panic(err)
 	}
 	return func(c *gin.Context) {
-
 		c.Set("db", db)
 		c.Next()
 	}
-
 }
 
 func main() {
-	ginServer := gin.New()
-	ginServer.Use(dbWare())
-	ginServer.GET("/user/all", usersIndex)
-	ginServer.GET("/user/find/:email", userSearch)
-	ginServer.POST("/user/new", userAdd)
-	ginServer.DELETE("/user/delete/:email", userRemove)
+	//load the config
+	file, err := os.Open("config.json")
+	defer file.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	conf := Conf{}
+
+	err = decoder.Decode(&conf)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	// Set up server
+	ginServer := gin.Default()
+	ginServer.Use(dbWare(conf.Url))
+	//user routes
+	//ginServer.POST("/login", )
+	ginServer.POST("/login/new", userAdd)
+
+	ginServer.GET("/api/user/all", usersIndex)
+	ginServer.GET("/api/user/find/:email", userSearch)
+	ginServer.DELETE("/api/user/delete/:email", userRemove)
+	//course routes
+	ginServer.GET("/api/course/all/:email", courseIndex)
+	ginServer.POST("/api/course/new", courseAdd)
+	ginServer.PUT("/api/course/update/:id", courseUpdate)
+	ginServer.DELETE("/api/course/delete/:id", courseRemove)
 
 	ginServer.Run(":3001")
 }
@@ -84,19 +94,39 @@ func userRemove(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"success": "User removed"})
 }
 
-// func courseIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != "GET" {
-// 		http.Error(w, http.StatusText(405), 405)
-// 		return
-// 	}
+func courseIndex(ctx *gin.Context) {
+	courses, err := models.AllCourses(ctx)
+	if err != nil {
+		log.Fatal(err)
+		ctx.JSON(404, gin.H{"error": "No courses found"})
+		return
+	}
+	ctx.JSON(200, courses)
+}
 
-// 	courses, err := models.ListCourse(ctx)
-// 	if err != nil {
-// 		http.Error(w, http.StatusText(500), 500)
-// 		return
-// 	}
+func courseAdd(ctx *gin.Context) {
+	_, err := models.AddCourse(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Internal error"})
+		return
+	}
+	ctx.JSON(200, gin.H{"success": "New course added"})
+}
 
-// 	for _, user := range users {
-// 		fmt.Fprintf(w, "%d, %s, %s\n", user.Id, user.Name, user.Email)
-// 	}
-// }
+func courseUpdate(ctx *gin.Context) {
+	_, err := models.UpdateCourse(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Error processing request"})
+		return
+	}
+	ctx.JSON(200, gin.H{"success": "Course updated"})
+}
+
+func courseRemove(ctx *gin.Context) {
+	_, err := models.RemoveCourse(ctx)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Internal error"})
+		return
+	}
+	ctx.JSON(200, gin.H{"success": "Course removed"})
+}
