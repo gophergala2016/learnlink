@@ -31,8 +31,23 @@ angular.module('LEARNLINK').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('/client/templates/index.html',
-    "<h1>YOU DID IT</h1>\n" +
-    "<a href=\"/login\">Click</a>"
+    "<div layout=\"column\" flex>\n" +
+    "  <md-card ng-repeat=\"course in hard_coded_courses\">\n" +
+    "    <!-- <img ng-src=\"{{imagePath}}\" class=\"md-card-image\" alt=\"Washed Out\"> -->\n" +
+    "    <md-card-title>\n" +
+    "      <md-card-title-text>\n" +
+    "        <span class=\"md-headline\">{{ course.name }}</span>\n" +
+    "      </md-card-title-text>\n" +
+    "    </md-card-title>\n" +
+    "    <md-card-content>\n" +
+    "      <p>{{ course.note }}</p>\n" +
+    "    </md-card-content>\n" +
+    "    <md-card-actions layout=\"row\" layout-align=\"end center\">\n" +
+    "      <md-button>Prioritize</md-button>\n" +
+    "      <md-button>Checkoff</md-button>\n" +
+    "    </md-card-actions>\n" +
+    "  </md-card>\n" +
+    "</div>"
   );
 
 
