@@ -1,55 +1,59 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/jebrial/learnlink/models"
-	//"io/ioutil"
 	"log"
+	"os"
 )
 
-// type Config struct {
-// 	dbUrl string
-// }
+type Conf struct {
+	Url string
+}
 
-func dbWare() gin.HandlerFunc {
-	// // //load the config
-	// file, err := ioutil.ReadFile("config.json")
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-	// var config Config
-	// err = json.Unmarshal(file, &config)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
+func dbWare(url string) gin.HandlerFunc {
 	// connect to the database
-
-	db, err2 := models.NewDB("")
-	if err2 != nil {
-		log.Panic(err2)
+	db, err := models.NewDB(url)
+	if err != nil {
+		log.Panic(err)
 	}
 	return func(c *gin.Context) {
-
 		c.Set("db", db)
 		c.Next()
 	}
-
 }
 
 func main() {
+	//load the config
+	file, err := os.Open("config.json")
+	defer file.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	conf := Conf{}
+
+	err = decoder.Decode(&conf)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	// Set up server
 	ginServer := gin.Default()
-	ginServer.Use(dbWare())
+	ginServer.Use(dbWare(conf.Url))
 	//user routes
-	ginServer.GET("/user/all", usersIndex)
-	ginServer.GET("/user/find/:email", userSearch)
-	ginServer.POST("/user/new", userAdd)
-	ginServer.DELETE("/user/delete/:email", userRemove)
+	//ginServer.POST("/login", )
+	ginServer.POST("/login/new", userAdd)
+
+	ginServer.GET("/api/user/all", usersIndex)
+	ginServer.GET("/api/user/find/:email", userSearch)
+	ginServer.DELETE("/api/user/delete/:email", userRemove)
 	//course routes
-	ginServer.GET("/course/all/:email", courseIndex)
-	ginServer.POST("/course/new", courseAdd)
-	ginServer.POST("/course/update/:id", courseUpdate)
-	ginServer.DELETE("/course/delete/:id", courseRemove)
+	ginServer.GET("/api/course/all/:email", courseIndex)
+	ginServer.POST("/api/course/new", courseAdd)
+	ginServer.PUT("/api/course/update/:id", courseUpdate)
+	ginServer.DELETE("/api/course/delete/:id", courseRemove)
 
 	ginServer.Run(":3001")
 }
@@ -126,20 +130,3 @@ func courseRemove(ctx *gin.Context) {
 	}
 	ctx.JSON(200, gin.H{"success": "Course removed"})
 }
-
-// func courseIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != "GET" {
-// 		http.Error(w, http.StatusText(405), 405)
-// 		return
-// 	}
-
-// 	courses, err := models.ListCourse(ctx)
-// 	if err != nil {
-// 		http.Error(w, http.StatusText(500), 500)
-// 		return
-// 	}
-
-// 	for _, user := range users {
-// 		fmt.Fprintf(w, "%d, %s, %s\n", user.Id, user.Name, user.Email)
-// 	}
-// }
