@@ -3,11 +3,12 @@ package models
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"log"
 	"time"
 )
 
 type User struct {
-	Id        int       `json:"user_id"`
+	Id        int       `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
@@ -40,9 +41,10 @@ func AllUsers(ctx *gin.Context) ([]*User, error) {
 
 func FindUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
-	email := ctx.Param("email")
+	email := ctx.PostForm("email")
 	user := new(User)
 	err := db.QueryRow("SELECT * FROM classmates WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	log.Println(user, err)
 	if err != nil {
 		return nil, err
 	}
