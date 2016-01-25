@@ -1,4 +1,6 @@
 <div layout="column" flex>
+  <!-- add a course -->
+  <!-- courses -->
   <md-card ng-repeat="course in hard_coded_courses">
     <!-- <img ng-src="{{imagePath}}" class="md-card-image" alt="Washed Out"> -->
     <md-card-title>
@@ -10,7 +12,6 @@
       <p>{{ course.note }}</p>
     </md-card-content>
     <md-card-actions layout="row" layout-align="end center">
-      <md-button>Prioritize</md-button>
       <md-button>Checkoff</md-button>
     </md-card-actions>
   </md-card>

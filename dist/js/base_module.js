@@ -25,6 +25,13 @@ angular
     $locationProvider.html5Mode(true);
 
   })
+  .service('CourseService', function ($http) {
+    return {
+      getCourses: function (email) {
+
+      },
+    };
+  })
   .controller('CourseCtrl', function ($scope) {
     $scope.hard_coded_courses = [
       {
