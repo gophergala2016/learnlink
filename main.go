@@ -74,7 +74,7 @@ func UserLogin(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"error": "error loging in"})
 		return
 	}
-	if bcrypt.CompareHashAndPassword(user.Password, ctx.PostForm("password")+"my secret pepper") != nil {
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(ctx.PostForm("password")+"my secret pepper")) != nil {
 		ctx.JSON(401, gin.H{"error": "User not Authorized"})
 		return
 	}
