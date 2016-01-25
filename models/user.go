@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"time"
 )
 
@@ -52,10 +54,11 @@ func FindUser(ctx *gin.Context) (*User, error) {
 func AddUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	user := new(User)
+	var err error
 	user.Name = ctx.PostForm("name")
 	user.Email = ctx.PostForm("email")
-	user.Password = ctx.PostForm("password")
-	err := db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
+	user.Password, err = bcrypt.GenerateFromPassword([]byte(ctx.PostForm("password")+"my secret pepper"), bcrypt.DefaultCost) // TODO MUST replace pepper string
+	err = db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
 	if err != nil {
 		return nil, err
 	}
