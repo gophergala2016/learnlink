@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/contrib/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jebrial/learnlink/models"
-	//"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
 	"time"
@@ -74,7 +74,7 @@ func UserLogin(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"error": "error loging in"})
 		return
 	}
-	if user.Password != ctx.PostForm("password") {
+	if bcrypt.CompareHashAndPassword(user.Password, ctx.PostForm("password")+"my secret pepper") != nil {
 		ctx.JSON(401, gin.H{"error": "User not Authorized"})
 		return
 	}
